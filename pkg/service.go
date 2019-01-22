@@ -7,11 +7,11 @@ import (
 	"encoding/base32"
 	"encoding/base64"
 	"fmt"
+	"github.com/ProtocolONE/mfa-service/pkg/proto"
 	"github.com/go-redis/redis"
 	"github.com/pquerna/otp/totp"
 	"image/png"
 	"net/url"
-	"p1mfa/pkg/proto"
 	"regexp"
 	"strings"
 )

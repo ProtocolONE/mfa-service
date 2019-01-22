@@ -37,8 +37,8 @@ import (
     "context"
     "fmt"
     "github.com/micro/go-micro"
-    "p1mfa/pkg"
-    "p1mfa/pkg/proto"
+    "github.com/ProtocolONE/mfa-service/pkg"
+    "github.com/ProtocolONE/mfa-service/pkg/proto"
 )
 
 func main() {

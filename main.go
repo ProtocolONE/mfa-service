@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/InVisionApp/go-health"
 	"github.com/InVisionApp/go-health/handlers"
+	"github.com/ProtocolONE/mfa-service/pkg"
+	"github.com/ProtocolONE/mfa-service/pkg/proto"
 	"github.com/go-redis/redis"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/micro/go-micro"
@@ -13,8 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
-	"p1mfa/pkg"
-	"p1mfa/pkg/proto"
 	"time"
 )
 

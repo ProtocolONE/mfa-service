@@ -1,4 +1,4 @@
-module p1mfa
+module github.com/ProtocolONE/mfa-service
 
 require (
 	github.com/InVisionApp/go-health v2.1.0+incompatible

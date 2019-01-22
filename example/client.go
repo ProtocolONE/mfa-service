@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/ProtocolONE/mfa-service/pkg"
+	"github.com/ProtocolONE/mfa-service/pkg/proto"
 	"github.com/micro/go-micro"
-	"p1mfa/pkg"
-	"p1mfa/pkg/proto"
 )
 
 func main() {
