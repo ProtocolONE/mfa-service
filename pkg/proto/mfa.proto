@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package proto;
+
+service MfaService {
+    rpc Create (MfaCreateDataRequest) returns (MfaCreateDataResponse) {}
+    rpc Check (MfaCheckDataRequest) returns (MfaCheckDataResponse) {}
+}
+
+message MfaCreateDataRequest {
+    string AppName = 1;
+    string UserID = 2;
+    string Email = 3;
+    int32 QrSize = 4;
+}
+
+message MfaCreateDataResponse {
+    string SecretKey = 1;
+    string URL = 2;
+    string QrCodeURL = 3;
+    string ImageBased = 4;
+    repeated string RecoveryCode = 5;
+}
+
+message MfaCheckDataRequest {
+    string Code = 1;
+    string UserID = 2;
+}
+
+message MfaCheckDataResponse {
+    bool Result = 1;
+    Error Error = 2;
+}
+
+message Error {
+    string Message = 1;
+}
