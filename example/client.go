@@ -20,11 +20,11 @@ func main() {
 
 	// Call it
 	rsp, err := client.Create(context.TODO(), &proto.MfaCreateDataRequest{
-		AppID:   "12312312312313",
-		AppName: "Dummy",
-		UserID:  "12312312312313",
-		Email:   "test@test.com",
-		QrSize:  300,
+		ProviderID: "12312312312313",
+		AppName:    "Dummy",
+		UserID:     "12312312312313",
+		Email:      "test@test.com",
+		QrSize:     300,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -34,9 +34,9 @@ func main() {
 
 	// Call it
 	rsp2, err2 := client.Check(context.TODO(), &proto.MfaCheckDataRequest{
-		AppID:  "12312312312313",
-		UserID: "12312312312313",
-		Code:   "dummy",
+		ProviderID: "12312312312313",
+		UserID:     "12312312312313",
+		Code:       "dummy",
 	})
 	if err2 != nil {
 		fmt.Println(err2)

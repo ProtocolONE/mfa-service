@@ -55,11 +55,11 @@ func main() {
     rsp, err := client.Create(
     	context.TODO(), 
     	&proto.MfaCreateDataRequest{
-    		AppID:   "12312312312313",
-    		AppName: "dummy", 
-    		UserID:  "123132123123",
-    		Email:   "test@test.com",
-    		QrSize:  300,
+    		ProviderID: "12312312312313",
+    		AppName:    "dummy", 
+    		UserID:     "123132123123",
+    		Email:      "test@test.com",
+    		QrSize:     300,
     	})
     if err != nil {
         fmt.Println(err)

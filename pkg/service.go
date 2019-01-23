@@ -58,10 +58,10 @@ func (s *Service) Create(ctx context.Context, req *proto.MfaCreateDataRequest, r
 	if err != nil {
 		return err
 	}
-	if err = s.Redis.SAdd(s.GetRecoveryStorageKey(req.AppID, req.UserID), codes).Err(); err != nil {
+	if err = s.Redis.SAdd(s.GetRecoveryStorageKey(req.ProviderID, req.UserID), codes).Err(); err != nil {
 		return err
 	}
-	if err = s.Redis.HSet(s.GetSecretStorageKey(req.UserID), req.AppID, key.Secret()).Err(); err != nil {
+	if err = s.Redis.HSet(s.GetSecretStorageKey(req.UserID), req.ProviderID, key.Secret()).Err(); err != nil {
 		return err
 	}
 
@@ -80,7 +80,7 @@ func (s *Service) Check(ctx context.Context, req *proto.MfaCheckDataRequest, res
 	}
 
 	res.Result = false
-	secret := s.Redis.HGet(s.GetSecretStorageKey(req.UserID), req.AppID)
+	secret := s.Redis.HGet(s.GetSecretStorageKey(req.UserID), req.ProviderID)
 	if secret.Err() != nil {
 		res.Error = &proto.Error{
 			Message: ErrorSecretKeyNotExists,
@@ -96,7 +96,7 @@ func (s *Service) Check(ctx context.Context, req *proto.MfaCheckDataRequest, res
 			}
 		}
 	} else {
-		r := s.Redis.SRem(s.GetRecoveryStorageKey(req.UserID, req.AppID), req.Code)
+		r := s.Redis.SRem(s.GetRecoveryStorageKey(req.UserID, req.ProviderID), req.Code)
 		if r.Err() != nil || r.Val() < 1 {
 			res.Error = &proto.Error{
 				Message: ErrorCodeInvalid,
@@ -136,8 +136,8 @@ func (s *Service) generateBase64QrCode(key *otp.Key, size int) (string, error) {
 }
 
 func (s *Service) validateCreateRequest(req *proto.MfaCreateDataRequest) error {
-	if req.AppID == "" {
-		return fmt.Errorf(ErrorRequestPropertyRequired, "AppID")
+	if req.ProviderID == "" {
+		return fmt.Errorf(ErrorRequestPropertyRequired, "ProviderID")
 	}
 	if req.AppName == "" {
 		return fmt.Errorf(ErrorRequestPropertyRequired, "AppName")
@@ -149,8 +149,8 @@ func (s *Service) validateCreateRequest(req *proto.MfaCreateDataRequest) error {
 }
 
 func (s *Service) validateCheckRequest(req *proto.MfaCheckDataRequest) error {
-	if req.AppID == "" {
-		return fmt.Errorf(ErrorRequestPropertyRequired, "AppID")
+	if req.ProviderID == "" {
+		return fmt.Errorf(ErrorRequestPropertyRequired, "ProviderID")
 	}
 	if req.UserID == "" {
 		return fmt.Errorf(ErrorRequestPropertyRequired, "UserID")
@@ -161,8 +161,8 @@ func (s *Service) validateCheckRequest(req *proto.MfaCheckDataRequest) error {
 	return nil
 }
 
-func (s *Service) GetRecoveryStorageKey(userId string, appId string) string {
-	return fmt.Sprintf(mfaRecoveryStoragePattern, userId, appId)
+func (s *Service) GetRecoveryStorageKey(userId string, ProviderID string) string {
+	return fmt.Sprintf(mfaRecoveryStoragePattern, userId, ProviderID)
 }
 
 func (s *Service) GetSecretStorageKey(userId string) string {
