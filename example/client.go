@@ -19,7 +19,13 @@ func main() {
 	client := proto.NewMfaService(mfa.ServiceName, service.Client())
 
 	// Call it
-	rsp, err := client.Create(context.TODO(), &proto.MfaCreateDataRequest{AppName: "Dummy", UserID: "12312312312313", Email: "test@test.com", QrSize: 300})
+	rsp, err := client.Create(context.TODO(), &proto.MfaCreateDataRequest{
+		AppID:   "12312312312313",
+		AppName: "Dummy",
+		UserID:  "12312312312313",
+		Email:   "test@test.com",
+		QrSize:  300,
+	})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -27,7 +33,11 @@ func main() {
 	fmt.Printf("%+v\n", rsp)
 
 	// Call it
-	rsp2, err2 := client.Check(context.TODO(), &proto.MfaCheckDataRequest{Code: "dummy", UserID: "12312312312313"})
+	rsp2, err2 := client.Check(context.TODO(), &proto.MfaCheckDataRequest{
+		AppID:  "12312312312313",
+		UserID: "12312312312313",
+		Code:   "dummy",
+	})
 	if err2 != nil {
 		fmt.Println(err2)
 	}
