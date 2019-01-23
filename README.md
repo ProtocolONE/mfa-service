@@ -52,7 +52,14 @@ func main() {
     client := proto.NewMfaService(mfa.ServiceName, service.Client())
 
     // Call it
-    rsp, err := client.Create(context.TODO(), &proto.MfaCreateDataRequest{Secret: "dummy", UserID: "123132123123"})
+    rsp, err := client.Create(
+    	context.TODO(), 
+    	&proto.MfaCreateDataRequest{
+    		AppName: "dummy", 
+    		UserID: "123132123123",
+    		Email: "test@test.com",
+    		QrSize: 300,
+    	})
     if err != nil {
         fmt.Println(err)
     }

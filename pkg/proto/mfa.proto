@@ -3,15 +3,18 @@ syntax = "proto3";
 package proto;
 
 service MfaService {
-    rpc Create (MfaCreateDataRequest) returns (MfaCreateDataResponse) {}
-    rpc Check (MfaCheckDataRequest) returns (MfaCheckDataResponse) {}
+    rpc Create (MfaCreateDataRequest) returns (MfaCreateDataResponse) {
+    }
+    rpc Check (MfaCheckDataRequest) returns (MfaCheckDataResponse) {
+    }
 }
 
 message MfaCreateDataRequest {
-    string AppName = 1;
-    string UserID = 2;
-    string Email = 3;
-    int32 QrSize = 4;
+    string AppID = 1;
+    string AppName = 2;
+    string UserID = 3;
+    string Email = 4;
+    int32 QrSize = 5;
 }
 
 message MfaCreateDataResponse {
@@ -23,8 +26,9 @@ message MfaCreateDataResponse {
 }
 
 message MfaCheckDataRequest {
-    string Code = 1;
+    string AppID = 1;
     string UserID = 2;
+    string Code = 3;
 }
 
 message MfaCheckDataResponse {

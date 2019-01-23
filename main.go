@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"github.com/InVisionApp/go-health"
 	"github.com/InVisionApp/go-health/handlers"
+	prometheusPlugin "github.com/ProtocolONE/go-micro-plugins/wrapper/monitoring/prometheus"
 	"github.com/ProtocolONE/mfa-service/pkg"
 	"github.com/ProtocolONE/mfa-service/pkg/proto"
 	"github.com/go-redis/redis"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
@@ -21,17 +20,10 @@ import (
 type Config struct {
 	RedisAddr      string `envconfig:"REDIS_ADDR" required:"true"`
 	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
-	MetricsPort    int    `envconfig:"METRICS_PORT" required:"false" default:"8080"`
+	MetricsPort    int    `envconfig:"METRICS_PORT" required:"false" default:"8081"`
 }
 
 type customHealthCheck struct{}
-
-var (
-	opsCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "mfa_processed_ops_total",
-		Help: "The total number of processed events",
-	})
-)
 
 func main() {
 	cfg := &Config{}
@@ -56,6 +48,7 @@ func main() {
 	options := []micro.Option{
 		micro.Name(mfa.ServiceName),
 		micro.Version(mfa.Version),
+		micro.WrapHandler(prometheusPlugin.NewHandlerWrapper((*proto.MfaService)(nil))),
 	}
 
 	if cfg.KubernetesHost == "" {
@@ -68,13 +61,13 @@ func main() {
 
 	service.Init()
 
-	err := proto.RegisterMfaServiceHandler(service.Server(), &mfa.Service{Redis: r, OpsCounter: opsCounter.Inc})
+	err := proto.RegisterMfaServiceHandler(service.Server(), &mfa.Service{Redis: r})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	initHealth(cfg)
-	initPrometheus()
+	initMetrics()
 
 	go func() {
 		if err = http.ListenAndServe(fmt.Sprintf(":%d", cfg.MetricsPort), nil); err != nil {
@@ -111,7 +104,7 @@ func initHealth(cfg *Config) {
 	http.HandleFunc("/health", handlers.NewJSONHandlerFunc(h, nil))
 }
 
-func initPrometheus() {
+func initMetrics() {
 	http.Handle("/metrics", promhttp.Handler())
 }
 
