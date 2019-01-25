@@ -6,10 +6,12 @@ mfa-service
 
 # Prerequisites
 Requires a [go installation](https://golang.org/dl/).
+Requires a [redis installation](https://redis.io/download/).
 
 ## Running the service
 This service works as [Go-Micro](https://github.com/micro/go-micro) microservice. You may want to 
-setup your own registry with `MICRO_REGISTRY`/`MICRO_REGISTRY_ADDRESS` or use other go-micro flags.  
+setup your own registry with `MICRO_REGISTRY`/`MICRO_REGISTRY_ADDRESS` or use other go-micro flags.
+Set the environment variable with the address of the redis server, for example `REDIS_ADDR=127.0.0.1:6379`.
 
 Download it 
 
