@@ -35,11 +35,6 @@ spec:
         heritage: {{ .Release.Service }}
         role: {{ $deployment.role }}
     spec:
-      {{/*volumes:
-      - name: {{ $deploymentName }}-config
-        secret:
-          secretName: {{ $deploymentName }}-config
-      */}}
       containers:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
@@ -62,8 +57,3 @@ spec:
           timeoutSeconds: 1
           failureThreshold: 3
           periodSeconds: 5
-        {{/*volumeMounts:
-        - name: {{ $deploymentName }}-config
-          mountPath: /application/etc/
-          readOnly: true
-        */}}
