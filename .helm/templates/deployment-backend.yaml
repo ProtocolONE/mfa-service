@@ -48,6 +48,8 @@ spec:
           value: "{{ $deployment.healthPort }}"
         - name: MICRO_SELECTOR
           value: "static"
+        - name: REDIS_ADDR
+          value: "{{ .Release.Name }}-redis:6379"
         ports:
         - containerPort: {{$deployment.port}}
         livenessProbe:
