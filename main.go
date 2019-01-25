@@ -48,7 +48,7 @@ func main() {
 	options := []micro.Option{
 		micro.Name(mfa.ServiceName),
 		micro.Version(mfa.Version),
-		micro.WrapHandler(prometheusPlugin.NewHandlerWrapper((*proto.MfaService)(nil))),
+		micro.WrapHandler(prometheusPlugin.NewHandlerWrapper()),
 	}
 
 	if cfg.KubernetesHost == "" {
