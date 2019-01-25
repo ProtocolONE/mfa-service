@@ -1,4 +1,4 @@
-{{- $deployment := .Values.frontend -}}
+{{- $deployment := .Values.backend -}}
 {{- $deploymentName := printf "%s-%s" .Release.Name $deployment.name }}
 apiVersion: apps/v1
 kind: Deployment
@@ -35,11 +35,7 @@ spec:
         heritage: {{ .Release.Service }}
         role: {{ $deployment.role }}
     spec:
-      {{/*volumes:
-      - name: {{ $deploymentName }}-config
-        secret:
-          secretName: {{ $deploymentName }}-config
-      */}}
+      serviceAccountName: {{ .Release.Name }}
       containers:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
@@ -47,7 +43,7 @@ spec:
         - name: MICRO_SERVER_ADDRESS
           value: "0.0.0.0:{{ $deployment.port }}"
         - name: MICRO_REGISTRY
-          value: "mdns"
+          value: "kubernetes"
         - name: METRICS_PORT
           value: "{{ $deployment.healthPort }}"
         - name: MICRO_SELECTOR
@@ -62,8 +58,3 @@ spec:
           timeoutSeconds: 1
           failureThreshold: 3
           periodSeconds: 5
-        {{/*volumeMounts:
-        - name: {{ $deploymentName }}-config
-          mountPath: /application/etc/
-          readOnly: true
-        */}}
