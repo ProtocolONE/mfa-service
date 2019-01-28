@@ -1,13 +1,13 @@
-package mfa_test
+package mfa
 
 import (
 	"context"
-	"github.com/ProtocolONE/mfa-service/pkg"
 	"github.com/ProtocolONE/mfa-service/pkg/proto"
 	"github.com/go-redis/redis"
 	"github.com/pquerna/otp/totp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -17,7 +17,7 @@ import (
 
 type ServiceTestSuite struct {
 	suite.Suite
-	service    *mfa.Service
+	service    *service
 	redis      *redis.Client
 	userID     string
 	ProviderID string
@@ -33,13 +33,13 @@ func (suite *ServiceTestSuite) SetupTest() {
 	})
 
 	suite.redis = r
-	suite.service = &mfa.Service{Redis: r}
+	suite.service = NewService(r, zap.L())
 	suite.userID = strconv.Itoa(random(1000000, 9999999))
 	suite.ProviderID = strconv.Itoa(random(1000000, 9999999))
 }
 
 func (suite *ServiceTestSuite) TearDownTest() {
-	suite.deleteKeys()
+	_ = suite.deleteKeys()
 	if err := suite.redis.Close(); err != nil {
 		panic(err)
 	}
@@ -107,7 +107,7 @@ func (suite *ServiceTestSuite) TestCheckToReturnFalseWithoutSecretKey() {
 
 	assert.Error(suite.T(), err)
 	assert.False(suite.T(), res.Result)
-	assert.Equal(suite.T(), mfa.ErrorSecretKeyNotExists, res.Error.Message)
+	assert.Equal(suite.T(), ErrorSecretKeyNotExists, res.Error.Message)
 }
 
 func (suite *ServiceTestSuite) TestCheckToReturnFalseWithRecoveryKey() {
@@ -117,13 +117,13 @@ func (suite *ServiceTestSuite) TestCheckToReturnFalseWithRecoveryKey() {
 
 	assert.Error(suite.T(), err)
 	assert.False(suite.T(), res.Result)
-	assert.Equal(suite.T(), mfa.ErrorSecretKeyNotExists, res.Error.Message)
+	assert.Equal(suite.T(), ErrorSecretKeyNotExists, res.Error.Message)
 }
 
 func (suite *ServiceTestSuite) TestCheckToReturnTrueWithRecoveryKey() {
 	res1 := &proto.MfaCreateDataResponse{}
 	req1 := proto.MfaCreateDataRequest{ProviderID: suite.ProviderID, AppName: "test", UserID: suite.userID}
-	suite.service.Create(context.TODO(), &req1, res1)
+	_ = suite.service.Create(context.TODO(), &req1, res1)
 
 	res2 := &proto.MfaCheckDataResponse{}
 	req2 := &proto.MfaCheckDataRequest{ProviderID: suite.ProviderID, UserID: suite.userID, Code: res1.RecoveryCode[0]}
@@ -136,12 +136,12 @@ func (suite *ServiceTestSuite) TestCheckToReturnTrueWithRecoveryKey() {
 func (suite *ServiceTestSuite) TestCheckToReturnFalseIfRecoveryKeysEmpty() {
 	res1 := &proto.MfaCreateDataResponse{}
 	req1 := proto.MfaCreateDataRequest{ProviderID: suite.ProviderID, AppName: "test", UserID: suite.userID}
-	suite.service.Create(context.TODO(), &req1, res1)
+	_ = suite.service.Create(context.TODO(), &req1, res1)
 
 	for i := 0; i < len(res1.RecoveryCode); i++ {
 		res2 := &proto.MfaCheckDataResponse{}
 		req2 := &proto.MfaCheckDataRequest{ProviderID: suite.ProviderID, UserID: suite.userID, Code: res1.RecoveryCode[0]}
-		suite.service.Check(context.TODO(), req2, res2)
+		_ = suite.service.Check(context.TODO(), req2, res2)
 	}
 
 	res2 := &proto.MfaCheckDataResponse{}
@@ -150,7 +150,7 @@ func (suite *ServiceTestSuite) TestCheckToReturnFalseIfRecoveryKeysEmpty() {
 
 	assert.NoError(suite.T(), err2)
 	assert.False(suite.T(), res2.Result)
-	assert.Equal(suite.T(), mfa.ErrorCodeInvalid, res2.Error.Message)
+	assert.Equal(suite.T(), ErrorCodeInvalid, res2.Error.Message)
 }
 
 func (suite *ServiceTestSuite) TestCheckToReturnFalseWithOtpKey() {
@@ -160,13 +160,13 @@ func (suite *ServiceTestSuite) TestCheckToReturnFalseWithOtpKey() {
 
 	assert.Error(suite.T(), err)
 	assert.False(suite.T(), res.Result)
-	assert.Equal(suite.T(), mfa.ErrorSecretKeyNotExists, res.Error.Message)
+	assert.Equal(suite.T(), ErrorSecretKeyNotExists, res.Error.Message)
 }
 
 func (suite *ServiceTestSuite) TestCheckToReturnTrueWithOtpKey() {
 	res1 := &proto.MfaCreateDataResponse{}
 	req1 := proto.MfaCreateDataRequest{ProviderID: suite.ProviderID, AppName: "test", UserID: suite.userID}
-	suite.service.Create(context.TODO(), &req1, res1)
+	_ = suite.service.Create(context.TODO(), &req1, res1)
 	code, _ := totp.GenerateCode(res1.GetSecretKey(), time.Now())
 
 	res2 := &proto.MfaCheckDataResponse{}

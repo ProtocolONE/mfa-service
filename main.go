@@ -12,7 +12,7 @@ import (
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -26,10 +26,13 @@ type Config struct {
 type customHealthCheck struct{}
 
 func main() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync() // flushes buffer, if any
+
 	cfg := &Config{}
 
 	if err := envconfig.Process("", cfg); err != nil {
-		log.Fatalf("Config init failed with error: %s\n", err)
+		logger.Fatal("Config init failed with error", zap.Error(err))
 	}
 
 	r := redis.NewClient(&redis.Options{
@@ -39,7 +42,7 @@ func main() {
 	defer func() {
 		err := r.Close()
 		if err != nil {
-			log.Fatal(err)
+			logger.Error("redis shutdown with error", zap.Error(err))
 		}
 	}()
 
@@ -53,34 +56,34 @@ func main() {
 
 	if cfg.KubernetesHost == "" {
 		service = micro.NewService(options...)
-		log.Println("Initialize micro service")
+		logger.Info("Initialize micro service")
 	} else {
 		service = k8s.NewService(options...)
-		log.Println("Initialize k8s service")
+		logger.Info("Initialize k8s service")
 	}
 
 	service.Init()
 
-	err := proto.RegisterMfaServiceHandler(service.Server(), &mfa.Service{Redis: r})
+	err := proto.RegisterMfaServiceHandler(service.Server(), mfa.NewService(r, logger))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("Register MfaServiceHandler failed with error", zap.Error(err))
 	}
 
-	initHealth(cfg)
+	initHealth(cfg, logger)
 	initMetrics()
 
 	go func() {
 		if err = http.ListenAndServe(fmt.Sprintf(":%d", cfg.MetricsPort), nil); err != nil {
-			log.Fatal("Metrics listen failed")
+			logger.Fatal("Metrics listen failed")
 		}
 	}()
 
 	if err := service.Run(); err != nil {
-		log.Fatal(err)
+		logger.Fatal("service run failed with error", zap.Error(err))
 	}
 }
 
-func initHealth(cfg *Config) {
+func initHealth(cfg *Config, logger *zap.Logger) {
 	h := health.New()
 	err := h.AddChecks([]*health.Config{
 		{
@@ -92,13 +95,13 @@ func initHealth(cfg *Config) {
 	})
 
 	if err != nil {
-		log.Fatal("Health check register failed")
+		logger.Fatal("Health check register failed with error", zap.Error(err))
 	}
 
-	log.Printf("Health check listening on :%d", cfg.MetricsPort)
+	logger.Info("Health check listening on port", zap.Int("port", cfg.MetricsPort))
 
 	if err = h.Start(); err != nil {
-		log.Fatal("Health check start failed")
+		logger.Fatal("Health check start failed with error", zap.Error(err))
 	}
 
 	http.HandleFunc("/health", handlers.NewJSONHandlerFunc(h, nil))
