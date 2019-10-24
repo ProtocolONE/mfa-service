@@ -10,17 +10,18 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/micro/go-micro"
-	k8s "github.com/micro/kubernetes/go/micro"
+	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 type Config struct {
-	RedisAddr      string `envconfig:"REDIS_ADDR" required:"true"`
-	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
-	MetricsPort    int    `envconfig:"METRICS_PORT" required:"false" default:"8081"`
+	RedisAddr   string `envconfig:"REDIS_ADDR" required:"true"`
+	MetricsPort int    `envconfig:"METRICS_PORT" required:"false" default:"8081"`
 }
 
 type customHealthCheck struct{}
@@ -54,13 +55,13 @@ func main() {
 		micro.WrapHandler(prometheusPlugin.NewHandlerWrapper()),
 	}
 
-	if cfg.KubernetesHost == "" {
-		service = micro.NewService(options...)
-		logger.Info("Initialize micro service")
-	} else {
-		service = k8s.NewService(options...)
-		logger.Info("Initialize k8s service")
+	if os.Getenv("MICRO_SELECTOR") == "static" {
+		log.Println("Use micro selector `static`")
+		options = append(options, micro.Selector(static.NewSelector()))
 	}
+
+	service = micro.NewService(options...)
+	logger.Info("Initialize micro service")
 
 	service.Init()
 
