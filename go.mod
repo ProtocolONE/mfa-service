@@ -16,4 +16,7 @@ require (
 	go.uber.org/zap v1.10.0
 )
 
-replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+replace (
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+	golang.org/x/sys => golang.org/x/sys v0.0.0-20190927073244-c990c680b611
+)
