@@ -447,6 +447,7 @@ github.com/micro/h2c v1.0.0/go.mod h1:54sOOQW/GRlHhH43vKwOhUb+kHaXhVxR0d3CJhn9al
 github.com/micro/mdns v0.0.0-20181201230301-9c3770d4057a/go.mod h1:SQG6o/94RinohLuB5noHSevg2Iqg2wXLDUn4lj2LWWo=
 github.com/micro/mdns v0.1.1-0.20190729112526-ef68c9635478 h1:L6jnZZ763dMLlvst8P0dWHa1WbUu7ppUY1q3AY2hhIU=
 github.com/micro/mdns v0.1.1-0.20190729112526-ef68c9635478/go.mod h1:KJ0dW7KmicXU2BV++qkLlmHYcVv7/hHnbtguSWt9Aoc=
+github.com/micro/micro v1.8.0 h1:qz4OScG3ojpp5hpXFQPZ7WhoU35FLUPOKx6cenXW3gk=
 github.com/micro/micro v1.8.0/go.mod h1:dF7nfyek86puqmlN1cEeyCos98rGzprwehRKJ4HMudE=
 github.com/micro/util v0.0.0-20181115195001-2d4f591dc538/go.mod h1:vxd7TGn28ynEMF4szG3PHTzgo3bx3FpfON9xpFsGc+g=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
